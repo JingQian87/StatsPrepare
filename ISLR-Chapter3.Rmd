@@ -1,0 +1,77 @@
+---
+title: "Chapter 3 Linear Regression"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+需要考虑的问题：
+* X与Y是否有relationship
+* X, Y间的relationship有多强
+* 哪些X对Y有贡献
+* 怎样估计每个X的参数，多准确
+* 对未来Y的预言有多准确
+* 是否是linear relationship
+* X间是否有协同作用
+
+## 3.1 Simple Linear Regression
+1. *Residual sum of squares* (RSS)
+
+RSS = $e_1^2 + \cdots + e_n^2 = (y_1 - \hat{\beta}_0 - \hat{\beta}_1 x_1)^2 + \cdots + (y_n - \hat{\beta}_0 - \hat{\beta}_1 x_n)^2$ 
+
+Least squares coefficient estimates, 通过minimize RSS得到系数：
+
+$\hat{\beta}_1 = \frac{\sum_{i=1}^n (x_i - \overline{x})(y_i - \overline{y})}{\sum_{i=1}^n(x_i - \overline{x})^2}$, 
+
+$\hat{\beta}_0 = \overline{y} - \hat{\beta}_1 \overline{x}$.
+
+其中$\overline{x} = \frac{1}{n} \sum_{i=1}^n x_i,\ \overline{y} = \frac{1}{n} \sum_{i=1}^n y_i$.
+
+<br>
+
+2. *Standard error* of sample mean $\hat{\mu}$ (SE($\hat{\mu}$)).
+* Var($\hat{\mu}$) = SE$(\hat{\mu})^2 = \frac{\sigma^2}{n}$.<br>
+其中$\sigma$是Y的standard deviation.
+* 1中给出了估计，但是这样的估计有多准确呢？通过SE就可以推测样本给出的$\hat{\beta}$离真实值多远 Eq.(3.8)。
+* *Residual standard error*, RSE = $\sqrt{\mathrm{RSS}/(n-2)}$.
+* SE可以用于进行*hypothesis tests*. 最常用的是区分null hypothesis vs. alternative hypothesis. <br>
+Null hypothesis: no relationship between X and Y. <br>
+Alternative hypothesis: exist relationship between X and Y.
+* 对于simple linear regression, null hypothesis就是$\beta_1 = 0$.
+我们有了$\hat{\beta}_1$, 通过SE($\hat{\beta}_1$)判断$\beta_1$是否远离0，就知道null hypothesis有多大可能成立。<br>
+**t-statistic**: $t = \frac{\hat{\beta}_1 - 0}{\mathrm{SE}(\hat{\beta}_1)}$.
+* General form是：$t=\frac{\overline{x}-\mu}{\frac{\sigma_x}{\sqrt{n-1}}}$. 通过t检验，判断样本参数是否可以代表总体参数，而不是由于随机抽取造成的。<br>
+比如对于正态分布，95.5%的样本值在真实值$\pm 2\sigma$。
+那么如果null hypothesis（$\mu = 0$）时，t statistic算下来是2，p = 0.05，也就是说，落在$\pm 2\sigma$之外的可能性只有0.05.
+而落在这些地方，根据这样的样本统计有95%的信心拒绝原本的null hypothesis。<br>
+***p value**: 原假设为真的前提下，出现该样本或比该样本更极端的结果的概率之和。
+从t检验到p value有假定。可以查表。
+通常认为1%的p value就可以是合理的reject null hypothesis。
+
+<br>
+
+3. 衡量linear regression accuracy
+常用两种方法：RSE; $R^2$ statistic.
+* RSE，对$\epsilon$ deviation的估计(但是没讲为什么不直接用RSS，不理解)， measure lack of fit of model to data.
+* $R^2 = \frac{TSS - RSS}{TSS} = 1-\frac{RSS}{TSS}$ <br>
+Total sum of squares TSS = $\sum_{i=1}^n(y_i - \overline{y})^2$. 
+$R^2$描述了Y中variability可以用X解释的一部分。
+由定义可见，$R^2$取值介于0与1之间。
+$R^2$越接近1，regression描述得越好。<br>
+*在simple regression setting下，$R^2 = Cor(X,Y)^2$
+
+
+## 3.2 Multiple Linear Regression
+* $Y=\beta_0+\beta_1X_1+\cdots+\beta_pX_P+\epsilon$.<br>
+类似的有，RSS = $\sum\limits_{i=1}^n(y_i - \hat{y}_i)^2 = \sum\limits_{i=1}^n(y_i-\hat{\beta}_0-\hat{\beta}_1x_{i1}-\cdots-\hat{\beta}_px_{ip})^2$.
+* Null hypothesis $H_0: \beta_1=\beta_2=\cdots=\beta_p=0$ <br>
+  用**F-statistic**检验: $F=\frac{(TSS-RSS)/p}{RSS/(n-p-1)}$.<br>
+  若$H_0$成立，$F \approx 1$; 反之若$H_a$成立，$F > 1$.
+* 那么$F$多大才够大呢？或者，如果$F \approx 1$,是否$H_0$一定不成立呢？这取决于$n$和$p$的值。
+若$n$很大，F比1大一点就可以拒绝$H_0$；反之，若$n$小，$F$就必须大。
+* 若检验其中q个系数为0，$H_0: \beta_{p-q+1}=\beta_{p-q+2}=\cdots=\beta_p=0$.
+这样用剩下来$p-q+1$个系数拟合的模型得到的residual sum of squares是RSS$_0$.
+此时$F=\frac{(RSS_0-RSS)/q}{RSS/(n-p-1)}$.
+
